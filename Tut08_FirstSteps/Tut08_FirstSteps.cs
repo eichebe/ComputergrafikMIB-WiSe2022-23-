@@ -36,7 +36,7 @@ namespace FuseeApp
             // A node containing one Camera component.
             _camera = new Camera(ProjectionMethod.Perspective, 5, 100, M.PiOver4)
             {
-                BackgroundColor = (float4)ColorUint.Greenery
+                BackgroundColor = new float4(0.5f, 0.5f, 1.0f, 1.0f) //(float4)ColorUint.Greenery
             };
 
             var cameraNode = new SceneNode();
@@ -46,6 +46,23 @@ namespace FuseeApp
             _scene = new SceneContainer();
             _scene.Children.Add(cameraNode);
 
+            //THE CUBE
+            var cubeTransform = new Transform{ Translation = new float3(0, 0, 50)};
+            var cubeEffect = MakeEffect.FromDiffuseSpecular((float4)ColorUint.Blue);
+            var cubeMesh = new CuboidMesh(new float3(10, 10, 10));
+
+            var cubeNode = new SceneNode();
+            cubeNode.Components.Add(cubeTransform);
+            cubeNode.Components.Add(cubeEffect);
+            cubeNode.Components.Add(cubeMesh);
+
+            //THE SCENE
+            _scene = new SceneContainer();
+            _scene.Children.Add(cameraNode);
+            _scene.Children.Add(cubeNode);
+            
+            
+            //THE SCENE RENDERER
             // Create a scene renderer holding the scene above
             _sceneRenderer = new SceneRendererForward(_scene);
         }
