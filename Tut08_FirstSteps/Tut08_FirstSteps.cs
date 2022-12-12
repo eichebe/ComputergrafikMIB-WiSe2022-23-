@@ -23,6 +23,9 @@ namespace FuseeApp
 
         private Camera _camera;
 
+        private Transform _cubeTransform;
+        private Transform _cameraTransform; 
+
 
         // Init is called on startup. 
         public override void Init()
@@ -41,13 +44,15 @@ namespace FuseeApp
 
             var cameraNode = new SceneNode();
             cameraNode.Components.Add(_camera);
+            _cameraTransform = new Transform{ Translation = new float3(0, 0, -50)};
 
             // Create the scene containing the cube as the only object
             _scene = new SceneContainer();
             _scene.Children.Add(cameraNode);
 
             //THE CUBE
-            var cubeTransform = new Transform{ Translation = new float3(0, 0, 50)};
+            _cubeTransform= new Transform{ Translation = new float3(0, 0, 50), Rotaition = new float3(0,45,0)};
+            
             var cubeEffect = MakeEffect.FromDiffuseSpecular((float4)ColorUint.Blue);
             var cubeMesh = new CuboidMesh(new float3(10, 10, 10));
 
@@ -70,7 +75,9 @@ namespace FuseeApp
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
         {
+            _cubeTransform.Rotaition = new float3(0, _cubeTransform.Rotaition +0.01f, 0);
 
+            _cubeTransform.Translation = new float3(Math.Sin(3 * TimeSinceStart),0,0);
             // Render the scene tree
             _sceneRenderer.Render(RC);
 
