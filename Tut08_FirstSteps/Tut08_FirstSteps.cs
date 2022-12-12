@@ -77,7 +77,7 @@ namespace FuseeApp
         {
             _cubeTransform.Rotaition = new float3(0, _cubeTransform.Rotaition +0.01f, 0);
 
-            _cubeTransform.Translation = new float3(Math.Sin(3 * TimeSinceStart),0,0);
+            _cubeTransform.Translation = new float3(5 * M.Sin(3 * TimeSinceStart),0,0);
             // Render the scene tree
             _sceneRenderer.Render(RC);
 
