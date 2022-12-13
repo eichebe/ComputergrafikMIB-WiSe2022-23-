@@ -6,6 +6,7 @@ using Fusee.Engine.Core.Scene;
 using Fusee.Math.Core;
 using Fusee.Serialization;
 using Fusee.Xene;
+using Fusee.Engine.Core.Effects;
 using static Fusee.Engine.Core.Input;
 using static Fusee.Engine.Core.Time;
 using Fusee.Engine.Gui;
@@ -25,6 +26,8 @@ namespace FuseeApp
 
         private Transform _cubeTransform;
         private Transform _cameraTransform; 
+
+        private SurfaceEffect _cubeEffect;
 
 
         // Init is called on startup. 
@@ -51,14 +54,15 @@ namespace FuseeApp
             _scene.Children.Add(cameraNode);
 
             //THE CUBE
-            _cubeTransform= new Transform{ Translation = new float3(0, 0, 50), Rotaition = new float3(0,45,0)};
             
-            var cubeEffect = MakeEffect.FromDiffuseSpecular((float4)ColorUint.Blue);
+            _cubeTransform= new Transform{ Translation = new float3(0, 0, 50), Rotation = new float3(0,45,0)};
+            
+            _cubeEffect = MakeEffect.FromDiffuseSpecular((float4)ColorUint.Blue);
             var cubeMesh = new CuboidMesh(new float3(10, 10, 10));
 
             var cubeNode = new SceneNode();
-            cubeNode.Components.Add(cubeTransform);
-            cubeNode.Components.Add(cubeEffect);
+            cubeNode.Components.Add(_cubeTransform);
+            cubeNode.Components.Add(_cubeEffect);
             cubeNode.Components.Add(cubeMesh);
 
             //THE SCENE
@@ -75,11 +79,20 @@ namespace FuseeApp
         // RenderAFrame is called once a frame
         public override void RenderAFrame()
         {
-            _cubeTransform.Rotaition = new float3(0, _cubeTransform.Rotaition +0.01f, 0);
+            _cubeTransform.Rotation = new float3(0, _cubeTransform.Rotation.y +0.01f, 0);
 
             _cubeTransform.Translation = new float3(5 * M.Sin(3 * TimeSinceStart),0,0);
+
+            //change color per second
+            _cubeEffect.SurfaceInput.Albedo = new float4(M.Sin(3 * Time.TimeSinceStart) *0.5f + 0.5f, //Rotkanal 
+                                                         M.Sin(7 * Time.TimeSinceStart) *0.5f + 0.5f, //Grünkanal
+                                                         M.Sin(6 * Time.TimeSinceStart) *0.5f + 0.5f, //Blaukanal
+                                                         1);    //Alfawert helligkeit
+            
             // Render the scene tree
             _sceneRenderer.Render(RC);
+
+            //Gradwert/360 * 2* pi (Grad in Radiant umrechenen)
 
             // Swap buffers: Show the contents of the backbuffer (containing the currently rendered frame) on the front buffer.
             Present();
