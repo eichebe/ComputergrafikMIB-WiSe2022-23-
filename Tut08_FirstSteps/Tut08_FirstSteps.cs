@@ -46,9 +46,7 @@ namespace FuseeApp
 
         private SurfaceEffect _snowflakesEffect;
         private float _cubeAngle = 0;
-        private float4 _colorSwitch;
-
-
+        private Transform _triangleCubeTransform;
 
         // Init is called on startup. 
         public override void Init()
@@ -62,7 +60,7 @@ namespace FuseeApp
             // A node containing one Camera component.
             _camera = new Camera(ProjectionMethod.Perspective, 5, 100, M.PiOver4)
             {
-                BackgroundColor = (float4)ColorUint.DarkGray
+                BackgroundColor = (float4)ColorUint.DarkBlue
             };
 
             var cameraNode = new SceneNode();
@@ -104,6 +102,14 @@ namespace FuseeApp
             longCubeNode.Components.Add(longCube);
 
             //Moving Angle Cubes
+            _triangleCubeTransform = new Transform {Translation = new float3(-20,20,20),
+                                                    Rotation = new float3(0,0,-10)};
+            _cubeEffect = MakeEffect.FromDiffuseSpecular((float4)ColorUint.Black);
+            CuboidMesh triangleCube = new CuboidMesh(new float3(5,15,5));
+            var triangleCubeNode = new SceneNode();
+            triangleCubeNode.Components.Add(_cubeEffect);
+            triangleCubeNode.Components.Add(_triangleCubeTransform);
+            triangleCubeNode.Components.Add(triangleCube);
             
             //Snowflake Cubes
             _snowflakesTransform = new Transform { Translation = new float3(30, 1, 20), Scale = new float3(4f, 5f, 0) };
@@ -147,6 +153,7 @@ namespace FuseeApp
             _scene.Children.Add(cameraNode);
             _scene.Children.Add(cubeNode);
             _scene.Children.Add(longCubeNode);
+            _scene.Children.Add(triangleCubeNode);
             for (int i = 0; i < amountSnowflakes; i++){
                 _scene.Children.Add(snowflakesNode[i]);
             }
@@ -170,22 +177,24 @@ namespace FuseeApp
 
             _longCubeTransform.Translation = new float3(30, 20 * M.Cos(6 * TimeSinceStart), 20);
 
+            
+
             Random rd  = new Random();
             var randomOne = rd.Next(-30,30);
             var randomTwo = rd.Next(-30,30);
             
-            int offset = 0;
+           
+            //_triangleCubeTransform.Translation = new float3(5, 20 * M.Cos(6 * TimeSinceStart), 0);
             for (int i = 0; i < _cubeSnowflakeTransform.Length; i++)
             {
                 _cubeSnowflakeTransform[i].Rotation = new float3(0, 0, _cubeAngle);
-                //_cubeSnowflakeTransform[i].Translation = new float3(radius * M.Cos(TimeSinceStart + difference), radius * M.Sin(TimeSinceStart + difference), 0);
                 _cubeSnowflakeTransform[i].Translation = new float3(randomOne, randomTwo,0);
-                for (int j = 0; j < _cubeSnowflakeTransform.Length; j++){
+                /*for (int j = 0; j < _cubeSnowflakeTransform.Length; j++){
                 _cubeSnowflakeTransform[j].Translation = new float3(5, 20 * M.Cos(6 * TimeSinceStart + offset), 0);
                 offset += 200;
                   
                 }
-                 
+                */ 
             }
 
             //change color per second
