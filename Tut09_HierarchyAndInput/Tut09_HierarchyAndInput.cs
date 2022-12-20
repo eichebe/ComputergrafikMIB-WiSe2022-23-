@@ -23,6 +23,10 @@ namespace FuseeApp
         private SceneRendererForward _sceneRenderer;
         private Transform _baseTransform;
 
+        private Transform _bodyTransform;
+
+        private Transform _upperArmTransform;
+
 
         SceneContainer CreateScene()
         {
@@ -32,6 +36,11 @@ namespace FuseeApp
                 Rotation = new float3(0, 0, 0),
                 Scale = new float3(1, 1, 1),
                 Translation = new float3(0, 0, 0)
+            };
+
+            _bodyTransform = new Transform
+            {
+                Translation = new float3(0,6,0)
             };
 
             // Setup the scene graph
@@ -57,22 +66,54 @@ namespace FuseeApp
 
                     new SceneNode
                     {
-                        Name = "Robot",
+                        Name = "Base (grey)",
                         Components =
                         {
-                            // TRANSFORM COMPONENT
                             _baseTransform,
-
-                            // SHADER EFFECT COMPONENT
                             MakeEffect.FromDiffuseSpecular((float4) ColorUint.LightGrey),
-
-                            // MESH COMPONENT
                             new CuboidMesh(new float3(10, 2, 10))
+                        },
+                        Children =
+                        {
+                            new SceneNode
+                            {
+                                Name = "Body (red)",
+                                Components =
+                                {
+                                    _bodyTransform,
+                                    MakeEffect.FromDiffuseSpecular((float4) ColorUint.IndianRed),
+                                    new CuboidMesh(new float3(2, 10, 2))
+                                },
+                                Children =
+                                {
+                                    new SceneNode
+                                    {
+                                        Name = "Upper Arm (green)",
+                                        Components =
+                                        {
+                                            _upperArmTransform,
+                                        },
+                                        Children =
+                                        {
+                                            new SceneNode
+                                            {
+                                                Components =
+                                                {
+                                                    new Transform { Translation = new float3(0, 4, 0)},
+                                                    MakeEffect.FromDiffuseSpecular((float4) ColorUint.ForestGreen),
+                                                    new CuboidMesh(new float3(2, 10, 2))
+                                                }
+                                            },
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             };
         }
+
 
 
         // Init is called on startup. 
