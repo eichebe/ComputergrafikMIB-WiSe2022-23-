@@ -39,14 +39,17 @@ namespace FuseeApp
 
         private SurfaceEffect[] _cubeSnowflakeEffect;
 
-
-        private SceneNode[] _cubeSceneNode;
-
         private Transform _snowflakesTransform;
 
         private SurfaceEffect _snowflakesEffect;
+
         private float _cubeAngle = 0;
-        private Transform _triangleCubeTransform;
+
+        private Transform _bigSnowflakeTransform;
+
+        private Transform[] _BigSnowflakeCubeTransformArr;
+
+        private SurfaceEffect[] _bigSnowflakeCubeEffect;
 
         // Init is called on startup. 
         public override void Init()
@@ -101,15 +104,51 @@ namespace FuseeApp
             longCubeNode.Components.Add(longCubeEffect);
             longCubeNode.Components.Add(longCube);
 
-            //Moving Angle Cubes
-            _triangleCubeTransform = new Transform {Translation = new float3(-20,20,20),
+            //Moving Big Snowflake Cubes
+            _bigSnowflakeTransform = new Transform {Translation = new float3(-20,20,20),
                                                     Rotation = new float3(0,0,-10)};
-            _cubeEffect = MakeEffect.FromDiffuseSpecular((float4)ColorUint.Black);
-            CuboidMesh triangleCube = new CuboidMesh(new float3(5,15,5));
-            var triangleCubeNode = new SceneNode();
-            triangleCubeNode.Components.Add(_cubeEffect);
-            triangleCubeNode.Components.Add(_triangleCubeTransform);
-            triangleCubeNode.Components.Add(triangleCube);
+            
+            CuboidMesh bigSnowflake = new CuboidMesh(new float3(5,15,2));
+            var BigSnowflakeCubeNode = new SceneNode();
+            
+            BigSnowflakeCubeNode.Components.Add(_cubeEffect);
+            BigSnowflakeCubeNode.Components.Add(_bigSnowflakeTransform);
+            BigSnowflakeCubeNode.Components.Add(_cubeMesh);
+            
+            var bigSnowflakeParts = 3;
+            
+            SceneNode[] bigSnowflakeNode = new SceneNode[bigSnowflakeParts];
+            _BigSnowflakeCubeTransformArr = new Transform[bigSnowflakeParts];
+            _bigSnowflakeCubeEffect = new SurfaceEffect[bigSnowflakeParts];
+
+            for(var j = 0; j < bigSnowflakeParts; j++){
+                
+                bigSnowflakeNode[j] = new SceneNode();
+                
+                if(j==0){
+                    _BigSnowflakeCubeTransformArr[j] = new Transform()
+                    {
+                        Translation = new float3(-23.5f,10,20),
+                        Rotation = new float3(0,0,-10),
+                    };
+                }else if(j==1){
+                    _BigSnowflakeCubeTransformArr[j] = new Transform()
+                    {
+                        Translation = new float3(-17,20,20),
+                        Rotation = new float3(0,0,10),
+                    };
+                }else{
+                    _BigSnowflakeCubeTransformArr[j] = new Transform()
+                    {
+                        Translation = new float3(-23.5f,10,20),
+                        Rotation = new float3(0,0,M.Pi/2),
+                    };
+                }
+                bigSnowflakeNode[j].Components.Add(_BigSnowflakeCubeTransformArr[j]);
+                bigSnowflakeNode[j].Components.Add(_cubeEffect);
+                bigSnowflakeNode[j].Components.Add(bigSnowflake);
+            }
+
             
             //Snowflake Cubes
             _snowflakesTransform = new Transform { Translation = new float3(30, 1, 20), Scale = new float3(4f, 5f, 0) };
@@ -140,7 +179,7 @@ namespace FuseeApp
                 };
 
 
-                _cubeSnowflakeEffect[i] = MakeEffect.FromDiffuseSpecular((float4)ColorUint.Blue);
+                //_cubeSnowflakeEffect[i] = MakeEffect.FromDiffuseSpecular((float4)ColorUint.Blue);
 
                 snowflakesNode[i].Components.Add(_cubeSnowflakeTransform[i]);
                 snowflakesNode[i].Components.Add(_snowflakesEffect);
@@ -153,9 +192,12 @@ namespace FuseeApp
             _scene.Children.Add(cameraNode);
             _scene.Children.Add(cubeNode);
             _scene.Children.Add(longCubeNode);
-            _scene.Children.Add(triangleCubeNode);
             for (int i = 0; i < amountSnowflakes; i++){
                 _scene.Children.Add(snowflakesNode[i]);
+            }
+
+            for (int j = 0; j < bigSnowflakeParts; j++) {
+                _scene.Children.Add(bigSnowflakeNode[j]);
             }
 
 
@@ -184,17 +226,16 @@ namespace FuseeApp
             var randomTwo = rd.Next(-30,30);
             
            
-            //_triangleCubeTransform.Translation = new float3(5, 20 * M.Cos(6 * TimeSinceStart), 0);
-            for (int i = 0; i < _cubeSnowflakeTransform.Length; i++)
-            {
+            for (int i = 0; i < _cubeSnowflakeTransform.Length; i++){
+
                 _cubeSnowflakeTransform[i].Rotation = new float3(0, 0, _cubeAngle);
                 _cubeSnowflakeTransform[i].Translation = new float3(randomOne, randomTwo,0);
-                /*for (int j = 0; j < _cubeSnowflakeTransform.Length; j++){
-                _cubeSnowflakeTransform[j].Translation = new float3(5, 20 * M.Cos(6 * TimeSinceStart + offset), 0);
-                offset += 200;
-                  
-                }
-                */ 
+               
+            }
+
+            for (int j = 0; j < _BigSnowflakeCubeTransformArr.Length; j++) {
+                
+                _BigSnowflakeCubeTransformArr[j].Translation = new float3(-23.5f,10, -20 * M.Cos(3 * TimeSinceStart));
             }
 
             //change color per second
