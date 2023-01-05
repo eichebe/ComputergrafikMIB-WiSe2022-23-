@@ -34,6 +34,10 @@ namespace FuseeApp
         private Boolean _robotHandOpen = false;
         private Boolean _robotHandClosed = false;
 
+        private Transform _bodyTransform;
+
+        private Transform _upperArmTransform;
+
 
         SceneContainer CreateScene()
         {
@@ -48,39 +52,6 @@ namespace FuseeApp
                 Rotation = new float3(0, 0, 0),
                 Scale = new float3(1, 1, 1),
                 Translation = new float3(0, 0, 0)
-            };
-
-            _bodyTransform = new Transform
-            {
-                Translation = new float3(0, 6, 0),
-                Rotation = new float3(0, (float) Math.PI/2, 0)
-            };
-
-            _upperRobotArmTransform = new Transform
-            {
-                Translation = new float3(2, 4, 0),
-                Rotation = new float3((float) Math.PI/4, 0, 0)
-            };
-
-            _frontRobotArmTransform = new Transform
-            {
-                Translation = new float3(-2, 4, 0),
-                Rotation = new float3((float) Math.PI/3, 0, 0)
-            };
-
-            _robotHandArmLeftTransform = new Transform
-            {
-                Translation = new float3(0, 4, 0),
-            };
-
-            _robotHandArmRightTransform = new Transform
-            {
-                Translation = new float3(0, 4, 0),
-            };
-
-            _robotUpperArmTransform = new Transform
-            {
-                Translation = new float3(0, 4, 0),
             };
 
             // Setup the scene graph
@@ -116,155 +87,18 @@ namespace FuseeApp
 
                     new SceneNode
                     {
-                        Name = "Base",
+                        Name = "Robot",
                         Components =
                         {
-                            // TRANSFORM COMPONENT
                             _baseTransform,
-
-                            // SHADER EFFECT COMPONENT
                             MakeEffect.FromDiffuseSpecular((float4) ColorUint.LightGrey),
-
-                            // MESH COMPONENT
                             new CuboidMesh(new float3(10, 2, 10))
-                        },
-                        Children =
-                        {
-                            new SceneNode
-                            {
-                                Name = "Robot",
-                                Components = 
-                                {
-                                    _bodyTransform,
-                                    MakeEffect.FromDiffuseSpecular((float4) ColorUint.IndianRed),
-                                    new CuboidMesh(new float3(2, 10, 2))
-                                },
-                                Children =
-                                {
-                                    new SceneNode
-                                    {
-                                        Name = "UpperArm",
-                                        Components = 
-                                        {
-                                            _upperRobotArmTransform,
-                                        },
-                                        Children = 
-                                        {
-                                            new SceneNode
-                                            {
-                                                Components =
-                                                {
-                                                    new Transform { Translation = new float3(0, 4, 0)},
-                                                    MakeEffect.FromDiffuseSpecular((float4) ColorUint.ForestGreen),
-                                                    new CuboidMesh(new float3(2, 10, 2))
-                                                },
-                                                Children =
-                                                {
-                                                    new SceneNode
-                                                    {
-                                                        Name = "FrontArm",
-                                                        Components = 
-                                                        {
-                                                            _frontRobotArmTransform,
-                                                        },
-                                                        Children = 
-                                                        {
-                                                            new SceneNode
-                                                            {
-                                                                Components =
-                                                                {
-                                                                    new Transform { Translation = new float3(0, 4, 0)},
-                                                                    MakeEffect.FromDiffuseSpecular((float4) ColorUint.Blue),
-                                                                    new CuboidMesh(new float3(2, 10, 2))
-                                                                },
-                                                                Children =
-                                                                {
-                                                                    new SceneNode
-                                                                    {
-                                                                        Name = "RobotHandArmLeft",
-                                                                        Components = 
-                                                                        {
-                                                                            _robotHandArmLeftTransform,
-                                                                        },
-                                                                        Children = 
-                                                                        {
-                                                                            new SceneNode
-                                                                            {
-                                                                                Components =
-                                                                                {
-                                                                                    new Transform 
-                                                                                    {
-                                                                                        Translation = new float3(1, 2, 1),
-                                                                                        Rotation = new float3(0, (float) Math.PI/4, 0)
-                                                                                    },
-                                                                                    MakeEffect.FromDiffuseSpecular((float4) ColorUint.LightGrey),
-                                                                                    new CuboidMesh(new float3(1, 3, 1))
-                                                                                }
-                                                                                
-                                                                            },
-                                                                        }
-                                                                    },
-                                                                    new SceneNode
-                                                                    {
-                                                                        Name = "RobotHandArmRight",
-                                                                        Components = 
-                                                                        {
-                                                                            _robotHandArmRightTransform,
-                                                                        },
-                                                                        Children =
-                                                                        {
-                                                                            new SceneNode
-                                                                            {
-                                                                                Components =
-                                                                                {
-                                                                                    new Transform 
-                                                                                    {
-                                                                                        Translation = new float3(-1, 2, 1),
-                                                                                        Rotation = new float3(0, (float) Math.PI/4, 0)
-                                                                                    },
-                                                                                    MakeEffect.FromDiffuseSpecular((float4) ColorUint.LightGrey),
-                                                                                    new CuboidMesh(new float3(1, 3, 1))
-                                                                                }
-                                                                                
-                                                                            }
-                                                                        }
-                                                                    },
-                                                                    new SceneNode
-                                                                    {
-                                                                        Name = "RobotHandUpperArm",
-                                                                        Components = 
-                                                                        {
-                                                                            _robotUpperArmTransform,
-                                                                        },
-                                                                        Children =
-                                                                        {
-                                                                            new SceneNode
-                                                                            {
-                                                                                Components =
-                                                                                {
-                                                                                    new Transform { Translation = new float3(0, 2, -1)},
-                                                                                    MakeEffect.FromDiffuseSpecular((float4) ColorUint.LightGrey),
-                                                                                    new CuboidMesh(new float3(1, 3, 1))
-                                                                                }
-                                                                                
-                                                                            }
-                                                                        }
-                                                                    }
-                                                                }
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
                         }
                     }
                 }
             };
         }
+
 
 
         // Init is called on startup. 
