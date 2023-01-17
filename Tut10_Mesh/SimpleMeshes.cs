@@ -116,39 +116,60 @@ namespace FuseeApp
     }
 
     public class CylinderMesh : Mesh
+{
+    public CylinderMesh(float radius, float height, int segments) 
     {
-        public CylinderMesh(float radius, float height, int segments) 
+        float3[] verts = new float3[segments * 2 + 2];
+        float3[] norms = new float3[segments * 2 + 2];
+        uint[] tris = new uint[4 * 3 * segments];
+
+        float delta = 2 * M.Pi / segments; 
+
+        
+        verts[segments * 2] = new float3(0, height / 2, 0);
+        //norms[segments * 2] = float3.UnitY;
+        verts[segments * 2 + 1] = new float3(0, -height / 2, 0);
+        //norms[segments * 2 + 1] = -float3.UnitY;
+
+        for(int i = 0; i < segments; i++)
         {
-            float3[] verts = new float3[segments + 1];
-            float3[] norms = new float3[segments + 1];
-            uint[] tris = new uint[segments * 3]; //3 tris per one segment
+            float x = radius * M.Cos(i * delta);
+            float y = height / 2;
+            float z = radius * M.Sin(i * delta);
 
-            float delta = 2 * M.Pi / segments; // delta Bogenmaas 360/segments
+            // Set the vertex and normal for the top of the cylinder
+            verts[i] = new float3(x, y, z);
+            //norms[i] = float3.UnitY;
+
+            // Set the vertex and normal for the bottom of the cylinder
+            verts[i + segments] = new float3(x, -y, z);
+            //norms[i + segments] = -float3.UnitY;
             
-            verts[segments] = float3.Zero;
 
-            norms[segments] = float3.UnitY;
+            int t = i * 6;
+            tris[t] = (uint)i;
+            tris[t + 1] = (uint)(i + 1);
+            tris[t + 2] = (uint)segments * 2;
+            tris[t + 3] = (uint)(i + segments);
+            tris[t + 4] = (uint)(i + 1 + segments);
+            tris[t + 5] = (uint)(segments * 2 + 1);
 
-            verts[0] = new float3(radius, 0, 0); //start at origin
             
-            norms[0] = float3.UnitY;
 
-            for(int i = 1; i <= segments;i++)
+            if (i == segments - 1)
             {
-                verts[i] = new float3(radius * M.Cos(i * delta), 0, radius * M.Sin(i * delta));
-                norms[i] = float3.UnitY; //Normale immer gleich
-                
-                tris[3 * i -1] = (ushort)segments;
-                tris[3 * i -2] = (ushort)i;
-                tris[3 * i -3] = (ushort)(i - 1);
+                tris[t + 1] = 0;
+                tris[t + 4] = (ushort)segments;
             }
-            
-            Vertices = new MeshAttributes<float3>(verts);
-            Normals = new MeshAttributes<float3>(norms);
-            Triangles = new MeshAttributes<uint>(tris);
-        }
-    }
 
+        }
+
+        // Set the Vertices, Normals, and Triangles properties of the Mesh class
+        Vertices = new MeshAttributes<float3>(verts);
+        Normals = new MeshAttributes<float3>(norms);
+        Triangles = new MeshAttributes<uint>(tris);
+    }
+}
     public class ConeMesh : ConeFrustumMesh
     {
         public ConeMesh(float radius, float height, int segments) : base(radius, 0.0f, height, segments) { }
