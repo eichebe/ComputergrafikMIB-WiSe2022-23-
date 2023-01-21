@@ -115,61 +115,134 @@ namespace FuseeApp
         }
     }
 
-    public class CylinderMesh : Mesh
+public class CylinderMesh : Mesh
 {
-    public CylinderMesh(float radius, float height, int segments) 
-    {
-        float3[] verts = new float3[segments * 2 + 2];
-        float3[] norms = new float3[segments * 2 + 2];
-        uint[] tris = new uint[4 * 3 * segments];
-
-        float delta = 2 * M.Pi / segments; 
-
+    public CylinderMesh(float radius, float height, int segments) {
         
-        verts[segments * 2] = new float3(0, height / 2, 0);
-        //norms[segments * 2] = float3.UnitY;
-        verts[segments * 2 + 1] = new float3(0, -height / 2, 0);
-        //norms[segments * 2 + 1] = -float3.UnitY;
+        // calculate the total number of vertices needed for the cylinder 
+        // 4 vertices for each segment (top, bottom, 2 sides) + 2 for the top and bottom center
+        float3[] verts = new float3[4*segments+2];
+        float3[] norms = new float3[4*segments+2];
+        uint[] tris = new uint[4*segments*3];
 
-        for(int i = 0; i < segments; i++)
+        // calculate the angle change between each segment
+        float delta = 2 * M.Pi / segments;
+
+        // create the top of the cylinder
+        // top vertex 
+        verts[0] = new float3(radius, 0.5f * height, 0);
+        norms[0] = new float3(0, 1, 0);
+        // top center
+        verts[4*segments+1] = new float3(0, 0.5f * height, 0);
+        norms[4*segments+1] = new float3(0, 1, 0);
+
+        // create the bottom of the cylinder
+        // bottom vertex
+        verts[segments] = new float3(radius, -0.5f * height, 0);
+        norms[segments] = new float3(0, -1, 0);
+        // bottom center
+        verts[4*segments] = new float3(0, -0.5f * height, 0);
+        norms[4*segments] = new float3(0, -1, 0);
+
+        //Top Side
+        verts[2*segments] = new float3(radius, 0.5f * height, 0);
+        norms[2*segments] = new float3(1, 0, 0);
+
+        //Bottom Side
+        verts[3*segments] = new float3(radius, -0.5f * height, 0);
+        norms[3*segments] = new float3(1, 0, 0);
+
+        //create the sides
+        for (int i = 1; i < segments; i++)
         {
-            float x = radius * M.Cos(i * delta);
-            float y = height / 2;
-            float z = radius * M.Sin(i * delta);
+            // calculate the x and y positions of each vertex
+            float x = radius * M.Cos(i*delta);
+            float y = radius * M.Sin(i*delta);
 
-            // Set the vertex and normal for the top of the cylinder
-            verts[i] = new float3(x, y, z);
-            //norms[i] = float3.UnitY;
+            // calculate the normals for the side of the cylinder
+            float x_normale = M.Cos(i*delta);
+            float y_normale = M.Sin(i*delta);
 
-            // Set the vertex and normal for the bottom of the cylinder
-            verts[i + segments] = new float3(x, -y, z);
-            //norms[i + segments] = -float3.UnitY;
+            // top vertex
+            verts[i] = new float3(x, 0.5f * height,y);
+
+            norms[i] = new float3(0, 1, 0);
+
+            // creating the triangles for the top of the cylinder
+            int tri_index = ((i-1)*3);
+            tris[tri_index + 0] = (uint) i-1;
+            tris[tri_index + 1] = (uint) i;
+            tris[tri_index + 2] = (uint) (4*segments+1);
+            tri_index = 0;
             
+            // side vertices
+            verts[2*segments+i] = new float3(x, 0.5f * height,y);
+            verts[3*segments+i] = new float3(x, -0.5f * height,y);
 
-            int t = i * 6;
-            tris[t] = (uint)i;
-            tris[t + 1] = (uint)(i + 1);
-            tris[t + 2] = (uint)segments * 2;
-            tris[t + 3] = (uint)(i + segments);
-            tris[t + 4] = (uint)(i + 1 + segments);
-            tris[t + 5] = (uint)(segments * 2 + 1);
+            norms[2*segments+i] = new float3(x_normale, 0, y_normale);
+            norms[3*segments+i] = new float3(x_normale, 0, y_normale);
+
+            // creating the triangles for the sides of the cylinder
+            tri_index = (2*segments+i-1)*3;
+            tris[tri_index + 0] = (uint) (2*segments+i-1);
+            tris[tri_index + 1] = (uint) (3*segments+i-1);
+            tris[tri_index + 2] = (uint) (2*segments+i);
+            tri_index = 0;
+
+            tri_index = (3*segments+i-1)*3;
+            tris[tri_index + 0] = (uint) (3*segments+i-1);
+            tris[tri_index + 1] = (uint) (3*segments+i);
+            tris[tri_index + 2] = (uint) (2*segments+i);
+            tri_index = 0;
+            // bottom vertex
+            verts[segments+i] = new float3(x, -0.5f * height,y);
+            norms[segments+i] = new float3(0, -1, 0);
+
+            // creating the triangles for the bottom of the cylinder
+            tri_index = (segments+i-1)*3;
+            tris[tri_index + 0] = (uint) (segments+i-1);
+            tris[tri_index + 1] = (uint) (segments+i);
+            tris[tri_index + 2] = (uint) (4*segments);
+            tri_index = 0;
 
             
-
-            if (i == segments - 1)
-            {
-                tris[t + 1] = 0;
-                tris[t + 4] = (ushort)segments;
-            }
-
         }
+            //Top
+            tris[3*segments-3] = (uint) segments-1;
+            tris[3*segments-2] = 0;
+            tris[3*segments-1] = (uint) (4*segments+1);
 
-        // Set the Vertices, Normals, and Triangles properties of the Mesh class
-        Vertices = new MeshAttributes<float3>(verts);
-        Normals = new MeshAttributes<float3>(norms);
-        Triangles = new MeshAttributes<uint>(tris);
+            //Bottom
+            tris[2*3*segments-3] = (uint) (2*segments-1);
+            tris[2*3*segments-2] = (uint) segments;
+            tris[2*3*segments-1] = (uint) (4*segments);
+
+            //Side
+            tris[3*3*segments-3] = (uint) (4*segments-1);
+            tris[3*3*segments-2] = (uint) (2*segments);
+            tris[3*3*segments-1] = (uint) (3*segments-1);
+
+            tris[4*3*segments-3] = (uint) (3*segments);
+            tris[4*3*segments-2] = (uint) (2*segments);
+            tris[4*3*segments-1] = (uint) (4*segments-1);
+            
+            Vertices = new MeshAttributes<float3>(verts);
+            Normals = new MeshAttributes<float3>(norms);
+            Triangles = new MeshAttributes<uint>(tris);
     }
 }
+
+       
+
+      
+    
+
+        
+
+
+
+
+        
     public class ConeMesh : ConeFrustumMesh
     {
         public ConeMesh(float radius, float height, int segments) : base(radius, 0.0f, height, segments) { }
