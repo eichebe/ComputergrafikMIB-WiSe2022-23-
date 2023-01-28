@@ -21,8 +21,11 @@ namespace FuseeApp
         private SceneContainer _scene;
         private SceneRendererForward _sceneRenderer;
         private Transform _camTransform;
+        private Transform _rightRearTransform;
+        private Transform _currentPickTransform;
         private float4 _oldColor;
-
+        private RayCastResult _currentPick;
+        private SceneRayCaster _sceneRayCaster;
 
         // Init is called on startup. 
         public override void Init()
@@ -58,8 +61,10 @@ namespace FuseeApp
 
         public override async Task InitAsync()
         {
-            _scene = CreateScene();
+            _scene = AssetStorage.Get<SceneContainer>("Forklift.fus");
 
+            //_scene.Children.FindNodes(nodes => nodes.Name == "LeftFrontWheel")?.FirstOrDefault()?.GetComponent<Transform>();
+            
             _camTransform = new Transform
             {
                 Translation = new float3(0, 5, -40),
@@ -79,8 +84,10 @@ namespace FuseeApp
 
             _scene.Children.Add(cam);
 
+            _rightRearTransform = _scene.Children.FindNodes(node => node.Name == "RightRearWheel")?.FirstOrDefault()?.GetTransform();
             // Create a scene renderer holding the scene above
             _sceneRenderer = new SceneRendererForward(_scene);
+            _sceneRayCaster = new SceneRayCaster(_scene);
 
             await base.InitAsync();
         }
@@ -91,8 +98,74 @@ namespace FuseeApp
             // Clear the backbuffer
             RC.Clear(ClearFlags.Color | ClearFlags.Depth);
 
-            _camTransform.RotateAround(float3.Zero, new float3(0, Keyboard.LeftRightAxis * DeltaTime, 0));
+        _camTransform.RotateAround(float3.Zero, new float3(0, Keyboard.LeftRightAxis * DeltaTime, 0));
+        _sceneRayCaster = new SceneRayCaster(_scene);
+        
+         if (Mouse.LeftButton)
+         {
+             float2 pickPos = Mouse.Position;
 
+             RayCastResult newPick = _sceneRayCaster.RayPick(RC, pickPos).OrderBy(rr => rr.DistanceFromOrigin).FirstOrDefault();
+
+             if (newPick?.Node != _currentPick?.Node)
+             {
+                 if (_currentPick != null)
+                 {  
+                     var ef = _currentPick.Node.GetComponent<SurfaceEffect>();
+                     ef.SurfaceInput.Albedo = _oldColor;
+                 }
+                 if (newPick != null)
+                 {
+                    var ef = newPick.Node.GetComponent<SurfaceEffect>();
+                    _oldColor = ef.SurfaceInput.Albedo;
+                    ef.SurfaceInput.Albedo = (float4) ColorUint.OrangeRed;
+                 }
+                 _currentPick = newPick;
+             }
+         }
+
+         if(_currentPick != null){
+            _currentPickTransform = _currentPick.Node.GetTransform();
+
+            if(_currentPick.Node.Name == "Axis"){
+                if(_currentPickTransform.Rotation.y + 2f * Keyboard.ADAxis * DeltaTime <= Math.PI/10 && _currentPickTransform.Rotation.y + 2f * Keyboard.ADAxis * DeltaTime >= -Math.PI/10){
+                 _currentPickTransform.Rotation = new float3
+                        (
+                            (float) _currentPickTransform.Rotation.x + 2f * Keyboard.WSAxis * DeltaTime,
+                            (float) _currentPickTransform.Rotation.y + 2f * Keyboard.ADAxis * DeltaTime,
+                            0
+                        );
+                }
+            }else if(_currentPick.Node.Name == "BalckWheel"){
+                _currentPickTransform.Rotation = new float3(
+                    (float) _currentPickTransform.Rotation.x + 2f * Keyboard.WSAxis * DeltaTime,
+                            0,
+                            0
+                );
+            }else if(_currentPick.Node.Name == "Fork"){
+                _currentPickTransform.Translation = new float3(
+                    (float) _currentPickTransform.Translation.x + 0,
+                    (float)_currentPickTransform.Translation.y + 2f * Keyboard.WSAxis * DeltaTime,
+                    (float) _currentPickTransform.Translation.z + 0
+
+                );
+            }else if(_currentPick.Node.Name == "Chassis"){
+                _currentPickTransform.Rotation = new float3(
+                    _currentPickTransform.Rotation.x + 0,
+                    (float) _currentPickTransform.Rotation.y + 2f * Keyboard.ADAxis * DeltaTime,
+                    _currentPickTransform.Rotation.z + 0
+
+                );
+                
+            }else{
+                _currentPickTransform.Rotation = new float3(
+                    (float) _currentPickTransform.Rotation.x + 2f * Keyboard.WSAxis * DeltaTime,
+                    _currentPickTransform.Rotation.y + 0,
+                    _currentPickTransform.Rotation.z + 0
+                );
+            }
+            
+         }
 
             // Render the scene on the current render context
             _sceneRenderer.Render(RC);
