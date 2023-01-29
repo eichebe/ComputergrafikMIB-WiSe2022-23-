@@ -118,7 +118,7 @@ namespace FuseeApp
                  {
                     var ef = newPick.Node.GetComponent<SurfaceEffect>();
                     _oldColor = ef.SurfaceInput.Albedo;
-                    ef.SurfaceInput.Albedo = (float4) ColorUint.OrangeRed;
+                    ef.SurfaceInput.Albedo = (float4) ColorUint.Violet;
                  }
                  _currentPick = newPick;
              }
